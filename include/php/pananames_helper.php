@@ -57,7 +57,7 @@ function ItemParam($db, $iid) {
                        JOIN tld ON tld.id = p.intname 
                        WHERE i.id=" . $iid);
     if ($res == FALSE)
-        throw new Error("query", $db->error);
+        setToLog('query ' . $db->error);
     $param = $res->fetch_assoc();
     $param_res = $db->query("SELECT intname, value FROM itemparam WHERE item = ".$iid);
     while ($row = $param_res->fetch_assoc()) {
@@ -146,51 +146,4 @@ function HttpQuery($url, $param, $requesttype = 'POST', $username = '', $passwor
     $out = curl_exec($curl);
     curl_close($curl);
     return $out;
-}
-
-class Error extends Exception
-{
-    private $m_object = "";
-    private $m_value = "";
-    private $m_param = "";
-    function __construct($message, $object = "", $value = "", $param = array()) {
-        parent::__construct($message);
-        $this->m_object = $object;
-        $this->m_value = $value;
-        $this->m_param = $param;
-        $error_msg = "Error: ". $message;
-        if ($this->m_object != "")
-                $error_msg .= ". Object: ". $this->m_object;
-        if ($this->m_value != "")
-                $error_msg .= ". Value: ". $this->m_value;
-        setToLog($error_msg);
-    }
-    public function __toString()
-    {
-    	$default_xml_string = '<?xml version="1.0" encoding="UTF-8"?>
-        	<doc>
-        	</doc>';
-        $error_xml = simplexml_load_string($default_xml_string);
-        $error_node = $error_xml->addChild("error");
-        $error_node->addAttribute("type", parent::getMessage());
-        if ($this->m_object != "") {
-            $error_node->addAttribute("object", $this->m_object);
-            $param = $error_node->addChild("param", $this->m_object);
-            $param->addAttribute("name", "object");
-            $param->addAttribute("type", "msg");
-            $param->addAttribute("msg", $this->m_object);
-        }
-        if ($this->m_value != "") {
-            $param = $error_node->addChild("param", $this->m_value);
-            $param->addAttribute("name", "value");
-            $desc = $error_node->addChild("param", "desck_empty");
-            $desc->addAttribute("name", "desc");
-            $desc->addAttribute("type", "msg");
-        }
-        foreach ($this->m_param as $name => $value) {
-            $param = $error_node->addChild("param", $value);
-            $param->addAttribute("name", $name);
-        }
-        return $error_xml->asXML();
-    }
 }
