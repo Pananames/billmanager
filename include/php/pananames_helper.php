@@ -11,7 +11,7 @@ class DB extends mysqli {
             throw new Error('MYSQLI_OPT_CONNECT_TIMEOUT Fail');
         if (!parent::real_connect($host, $user, $pass, $db))
             throw new Error('Connection ERROR. ' . mysqli_connect_errno() . ': ' . mysqli_connect_error());
-        setToLog("MySQL connection established");
+        setToLog('MySQL connection established');
     }
     public function __destruct() {
         setToLog('MySQL connection closed');

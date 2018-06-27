@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-set_include_path(get_include_path() . PATH_SEPARATOR . '/var/www/billmanager/include/php');
+set_include_path(get_include_path() . PATH_SEPARATOR . '/usr/local/mgr5/include/php');
 require_once 'pananames_commands.php';
 require_once 'pananames_helper.php';
 
