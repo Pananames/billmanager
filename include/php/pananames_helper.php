@@ -5,36 +5,35 @@ date_default_timezone_set("UTC");
 class DB extends mysqli {
     public function __construct($host, $user, $pass, $db) {
         parent::init();
-        if (!parent::options(MYSQLI_INIT_COMMAND, "SET AUTOCOMMIT = 1"))
-            throw new Error("MYSQLI_INIT_COMMAND Fail");
+        if (!parent::options(MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT = 1'))
+            throw new Error('MYSQLI_INIT_COMMAND Fail');
         if (!parent::options(MYSQLI_OPT_CONNECT_TIMEOUT, 5))
-            throw new Error("MYSQLI_OPT_CONNECT_TIMEOUT Fail");
+            throw new Error('MYSQLI_OPT_CONNECT_TIMEOUT Fail');
         if (!parent::real_connect($host, $user, $pass, $db))
-            throw new Error("Connection ERROR. ".mysqli_connect_errno().": ".mysqli_connect_error());
+            throw new Error('Connection ERROR. ' . mysqli_connect_errno() . ': ' . mysqli_connect_error());
         setToLog("MySQL connection established");
     }
     public function __destruct() {
-        setToLog("MySQL connection closed");
+        setToLog('MySQL connection closed');
         parent::close();
     }
 }
 
 function LocalQuery($function, $param, $auth = NULL) {
-	$cmd = "/usr/local/mgr5/sbin/mgrctl -m billmgr -o xml " . escapeshellarg($function) . " ";
-	foreach ($param as $key => $value) {
-            $cmd .= escapeshellarg($key) . "=" . escapeshellarg($value) . " ";
-	}
-	if (!is_null($auth)) {
-            $cmd .= " auth=" . escapeshellarg($auth);
-	}
-	$out = array();
-	exec($cmd, $out);
-	$out_str = "";
-	foreach ($out as $value) {
-            $out_str .= $value . "\n";
-	}
-	//Debug("[LOCAL QUERY FUNCTION] mgrctl out: ". $out_str);
-	return simplexml_load_string($out_str);
+    $cmd = '/usr/local/mgr5/sbin/mgrctl -m billmgr -o xml ' . escapeshellarg($function) . ' ';
+    foreach ($param as $key => $value) {
+        $cmd .= escapeshellarg($key) . '=' . escapeshellarg($value) . ' ';
+    }
+    if (!is_null($auth)) {
+        $cmd .= " auth=" . escapeshellarg($auth);
+    }
+    $out = array();
+    exec($cmd, $out);
+    $out_str = "";
+    foreach ($out as $value) {
+        $out_str .= $value . "\n";
+    }
+    return simplexml_load_string($out_str);
 }
 
 function GetConnection() {
@@ -42,26 +41,32 @@ function GetConnection() {
     $user = explode(' = ', $connectionData[1]);
     $pass = explode(' = ', $connectionData[2]);
     $param_map = array();
-    $param_map["DBHost"] = "localhost";
-    $param_map["DBUser"] = trim($user[1]);
-    $param_map["DBPassword"] = trim($pass[1]);
-    $param_map["DBName"] = "billmgr";
-    return new DB($param_map["DBHost"], $param_map["DBUser"], $param_map["DBPassword"], $param_map["DBName"]);
+    $param_map['DBHost'] = 'localhost';
+    $param_map['DBUser'] = trim($user[1]);
+    $param_map['DBPassword'] = trim($pass[1]);
+    $param_map['DBName'] = 'billmgr';
+    return new DB($param_map['DBHost'], $param_map['DBUser'], $param_map['DBPassword'], $param_map['DBName']);
 }
 
 function ItemParam($db, $iid) {
-    $res = $db->query("SELECT i.id AS item_id, i.processingmodule AS item_module, i.period AS item_period, i.status AS item_status, i.expiredate, 
-                              tld.name AS tld_name 
+    $res = $db->query("SELECT i.id AS item_id, i.processingmodule AS item_module, i.period AS item_period, i.status AS item_status, i.expiredate, tld.name AS tld_name 
                        FROM item i 
                        JOIN pricelist p ON p.id = i.pricelist 
                        JOIN tld ON tld.id = p.intname 
                        WHERE i.id=" . $iid);
-    if ($res == FALSE)
-        setToLog('query ' . $db->error);
+    if ($res == FALSE) {
+        setToLog('query ItemParam' . $db->error);
+        setToLog('query ' . "SELECT i.id AS item_id, i.processingmodule AS item_module, i.period AS item_period, i.status AS item_status, i.expiredate, tld.name AS tld_name 
+                       FROM item i 
+                       JOIN pricelist p ON p.id = i.pricelist 
+                       JOIN tld ON tld.id = p.intname 
+                       WHERE i.id=" . $iid);
+    }
+    
     $param = $res->fetch_assoc();
-    $param_res = $db->query("SELECT intname, value FROM itemparam WHERE item = ".$iid);
+    $param_res = $db->query('SELECT intname, value FROM itemparam WHERE item = ' . $iid);
     while ($row = $param_res->fetch_assoc()) {
-        $param[$row["intname"]] = $row["value"];
+        $param[$row['intname']] = $row['value'];
     }
     return $param;
 }
@@ -73,6 +78,15 @@ function ItemProfiles($db, $iid, $module) {
                        JOIN service_profile2item sp2i ON sp2i.item = i.id 
                        LEFT JOIN service_profile2processingmodule sp2p ON sp2p.service_profile = sp2i.service_profile AND sp2i.type = sp2p.type AND sp2p.processingmodule = " . $module . "
                        WHERE i.id=" . $iid);
+    if ($res == FALSE) {
+        setToLog('query ItemProfiles ' . $db->error);
+        setToLog('query ' . "SELECT sp2i.service_profile AS service_profile, sp2i.type AS type, sp2p.externalid AS externalid, sp2p.externalpassword AS externalpassword 
+                       FROM item i 
+                       JOIN service_profile2item sp2i ON sp2i.item = i.id 
+                       LEFT JOIN service_profile2processingmodule sp2p ON sp2p.service_profile = sp2i.service_profile AND sp2i.type = sp2p.type AND sp2p.processingmodule = " . $module . "
+                       WHERE i.id=" . $iid);
+    }
+        
     while ($row = $res->fetch_assoc()) {
         $param[$row["type"]] = array();
         $param[$row["type"]]["externalid"] = $row["externalid"];

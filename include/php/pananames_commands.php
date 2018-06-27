@@ -10,9 +10,8 @@ class Command {
     public function runCommand($options)
     {
         $commandName = explode('_', $options['command']);
-        $commandName = $commandName[0] . ucfirst($commandName[1]);
-        $item = array_key_exists('item', $options) ? (int)$options['item'] : 0;
-        $this->$commandName($commandName, $item);
+        $commandName = $commandName[0] . (isset($commandName[1]) ? ucfirst($commandName[1]) : '');
+        $this->$commandName($options);
         return;
     }
     
@@ -92,7 +91,7 @@ class Command {
     private function open($options)
     {
         $db = GetConnection();
-        $iid = $options['item'];
+        $iid = array_key_exists('item', $options) ? (int)$options['item'] : 0;
         $item_param = ItemParam($db, $iid);
         $profile_params = ItemProfiles($db, $iid, $item_param['item_module']);
 
@@ -171,7 +170,7 @@ class Command {
     private function close($options)
     {
         $db = GetConnection();
-        $iid = $options['item'];
+        $iid = array_key_exists('item', $options) ? (int)$options['item'] : 0;
         $item_param = ItemParam($db, $iid);
     
         $url = getApiUrl($db, $item_param["item_module"]) . 'domains/' . $item_param['domain'];
