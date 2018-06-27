@@ -23,3 +23,7 @@ Make file /usr/local/mgr5/processing/pmpananames.php executable
 
 Reload Billmanager
 - pkill core
+
+### Where is module
+Now you can find Pananames module in 
+Left menu -> Integration -> Processing modules -> Add -> Domains -> Pananames
