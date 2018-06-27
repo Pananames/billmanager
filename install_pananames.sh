@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd /tmp
 yum -y install php php-mysqli
 wget https://codeload.github.com/Pananames/billmanager/zip/masterv
 tar -xvf master --strip-components=1 -C /usr/local/mgr5/
