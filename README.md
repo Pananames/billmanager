@@ -17,6 +17,7 @@ To install, download zip archive with code and unzip files to:
 - /usr/local/mgr5/etc/xml/billmgr_mod_pmpananames.xml
 - /usr/local/mgr5/include/php/pananames_commands.php
 - /usr/local/mgr5/include/php/pananames_helper.php
+- /usr/local/mgr5/skins/common/plugin-logo/billmanager-plugin-pmpananames.png
 
 Make file /usr/local/mgr5/processing/pmpananames.php executable
 - chmod +x /usr/local/mgr5/processing/pmpananames.php
