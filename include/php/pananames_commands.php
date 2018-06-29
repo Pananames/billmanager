@@ -10,7 +10,7 @@ class Command {
     public function runCommand($options)
     {
         $commandName = explode('_', $options['command']);
-        $commandName = $commandName[0] . (isset($commandName[1]) ? ucfirst($commandName[1]) : '');
+        $commandName = $commandName[0] . (isset($commandName[1]) ? ucfirst($commandName[1]) : '') . (isset($commandName[2]) ? ucfirst($commandName[2]) : '');
         $this->$commandName($options);
         return;
     }
@@ -32,6 +32,7 @@ class Command {
              <feature name="open"/>
              <feature name="close"/>
              <feature name="sync_server"/>
+             <feature name="service_profile_update"/>
           </features>
         </doc>';
         return;
@@ -144,7 +145,7 @@ class Command {
                 'phone' => str_replace([' (', ') ', '-'], ['.', '', ''], $profile_params['bill']['phone'])
             ],
             'premium_price' => 0,
-            'claims_accepted' => true
+            'claims_accepted' => getIsWhoisPrivate($db, $iid)
         ];
     
         $url = getApiUrl($db, $item_param["item_module"]) . 'domains';
@@ -222,6 +223,29 @@ class Command {
 	} else {
 	    setToLog('Error sync_item domain on Pananames $result->errors[0]->description = ' . $result->errors[0]->description);
         }
+        return;
+    }
+    
+    private function serviceProfileUpdate()
+    {
+        echo '<?xml version="1.0" encoding="UTF-8"?>
+        <doc>
+          <itemtypes>
+            <itemtype name="domain"/>
+          </itemtypes>
+          <params>
+            <param name="url"/>
+            <param name="signature" crypted="yes"/>
+          </params>
+          <features>
+             <feature name="tune_connection"/>
+             <feature name="check_connection"/>
+             <feature name="open"/>
+             <feature name="close"/>
+             <feature name="sync_server"/>
+             <feature name="service_profile_update"/>
+          </features>
+        </doc>';
         return;
     }
 }

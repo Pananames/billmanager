@@ -112,6 +112,15 @@ function getSignature($db, $moduleId) {
     return $signature;
 }
 
+function getIsWhoisPrivate($db, $domainId) {
+    $param_res = $db->query('SELECT boolvalue FROM item WHERE pricelist=2 AND parent=' . $domainId . ' LIMIT 1');
+    if (!$param_res) {
+        return '';
+    }
+    $isWhoisPrivate = $param_res->fetch_row()[0] !== 'off';
+    return $isWhoisPrivate;
+}
+
 function getApiUrl($db, $moduleId) {
     $param_res = $db->query('SELECT value FROM processingparam WHERE processingmodule = ' . $moduleId . ' AND intname = "url" LIMIT 1');
     if (!$param_res) {
