@@ -102,6 +102,26 @@ function ItemProfiles($db, $iid, $module) {
     return $param;
 }
 
+function ItemProfilesByProfileId($db, $pid) {
+    $param = array();
+    $res = $db->query('SELECT sp2i.service_profile AS service_profile, sp2i.type AS type FROM service_profile2item sp2i WHERE service_profile = ' . $pid);
+    if ($res == FALSE) {
+        setToLog('query ItemProfilesByProfileId ' . $db->error);
+        setToLog('query ' . 'SELECT sp2i.service_profile AS service_profile, sp2i.type AS type FROM service_profile2item sp2i WHERE service_profile = ' . $pid);
+    }
+        
+    while ($row = $res->fetch_assoc()) {
+        $param[$row['type']] = array();
+        $profile_res = $db->query('SELECT intname, value 
+                       FROM service_profileparam 
+                       WHERE service_profile=' . $row['service_profile']);
+        while ($profile_row = $profile_res->fetch_assoc()) {
+            $param[$row["type"]][$profile_row['intname']] = $profile_row['value'];
+        }
+    }
+    return $param;
+}
+
 function getSignature($db, $moduleId) {
     $param_res = $db->query('SELECT value FROM processingcryptedparam WHERE processingmodule = ' . $moduleId . ' AND intname = "signature" LIMIT 1');
     if (!$param_res) {

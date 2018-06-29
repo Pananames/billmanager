@@ -99,7 +99,7 @@ class Command {
         $params = [
             'domain' => $item_param['domain'],
             'period' => round($item_param['item_period'] / 12, 1),
-            'whois_privacy' => true,
+            'whois_privacy' => getIsWhoisPrivate($db, $iid),
             'registrant_contact' => [
                 'org' => '',
                 'name' => $profile_params['owner']['firstname'] . ' ' . $profile_params['owner']['middlename'] . ' ' . $profile_params['owner']['lastname'],
@@ -145,7 +145,7 @@ class Command {
                 'phone' => str_replace([' (', ') ', '-'], ['.', '', ''], $profile_params['bill']['phone'])
             ],
             'premium_price' => 0,
-            'claims_accepted' => getIsWhoisPrivate($db, $iid)
+            'claims_accepted' => true
         ];
     
         $url = getApiUrl($db, $item_param["item_module"]) . 'domains';
@@ -226,26 +226,76 @@ class Command {
         return;
     }
     
-    private function serviceProfileUpdate()
+    private function serviceProfileUpdate($options)
     {
-        echo '<?xml version="1.0" encoding="UTF-8"?>
-        <doc>
-          <itemtypes>
-            <itemtype name="domain"/>
-          </itemtypes>
-          <params>
-            <param name="url"/>
-            <param name="signature" crypted="yes"/>
-          </params>
-          <features>
-             <feature name="tune_connection"/>
-             <feature name="check_connection"/>
-             <feature name="open"/>
-             <feature name="close"/>
-             <feature name="sync_server"/>
-             <feature name="service_profile_update"/>
-          </features>
-        </doc>';
+        return;
+        
+        $db = GetConnection();
+        $ipd = array_key_exists('param', $options) ? (int)$options['param'] : 0;
+        $profile_params = ItemProfilesByProfileId($db, $ipd);
+
+        $params = [
+            'registrant_contact' => [
+                'org' => '',
+                'name' => $profile_params['owner']['firstname'] . ' ' . $profile_params['owner']['middlename'] . ' ' . $profile_params['owner']['lastname'],
+                'email' => $profile_params['owner']['email'],
+                'address' => $profile_params['owner']['location_address'],
+                'city' => $profile_params['owner']['location_city'],
+                'state' => $profile_params['owner']['location_state'],
+                'zip' => $profile_params['owner']['location_postcode'],
+                'country' => getCountryISO($db, $profile_params['owner']['location_country']),
+                'phone' => str_replace([' (', ') ', '-'], ['.', '', ''], $profile_params['owner']['phone'])
+            ],    
+            'admin_contact' => [
+                'org' => '',
+                'name' => $profile_params['admin']['firstname'] . ' ' . $profile_params['admin']['middlename'] . ' ' . $profile_params['admin']['lastname'],
+                'email' => $profile_params['admin']['email'],
+                'address' => $profile_params['admin']['location_address'],
+                'city' => $profile_params['admin']['location_city'],
+                'state' => $profile_params['admin']['location_state'],
+                'zip' => $profile_params['admin']['location_postcode'],
+                'country' => getCountryISO($db, $profile_params['admin']['location_country']),
+                'phone' => str_replace([' (', ') ', '-'], ['.', '', ''], $profile_params['admin']['phone'])
+            ],
+            'tech_contact' => [
+                'org' => '',
+                'name' => $profile_params['tech']['firstname'] . ' ' . $profile_params['tech']['middlename'] . ' ' . $profile_params['tech']['lastname'],
+                'email' => $profile_params['tech']['email'],
+                'address' => $profile_params['tech']['location_address'],
+                'city' => $profile_params['tech']['location_city'],
+                'state' => $profile_params['tech']['location_state'],
+                'zip' => $profile_params['tech']['location_postcode'],
+                'country' => getCountryISO($db, $profile_params['tech']['location_country']),
+                'phone' => str_replace([' (', ') ', '-'], ['.', '', ''], $profile_params['tech']['phone'])
+            ],
+            'billing_contact' => [
+                'org' => '',
+                'name' => $profile_params['bill']['firstname'] . ' ' . $profile_params['bill']['middlename'] . ' ' . $profile_params['bill']['lastname'],
+                'email' => $profile_params['bill']['email'],
+                'address' => $profile_params['bill']['location_address'],
+                'city' => $profile_params['bill']['location_city'],
+                'state' => $profile_params['bill']['location_state'],
+                'zip' => $profile_params['bill']['location_postcode'],
+                'country' => getCountryISO($db, $profile_params['bill']['location_country']),
+                'phone' => str_replace([' (', ') ', '-'], ['.', '', ''], $profile_params['bill']['phone'])
+            ]
+        ];
+    
+        $url = getApiUrl($db, $item_param["item_module"]) . 'domains';
+    	$requesttype = 'POST';
+    	$header = ['SIGNATURE: ' .  getSignature($db, $item_param["item_module"]), 'accept: application/json', 'content-type: application/json'];
+    	
+        setToLog('URL for open ' . $url);
+	setToLog('SIGNATURE for open ' . getSignature($db, $item_param["item_module"]));
+        setToLog('POST ' . json_encode($params));
+        
+        $result = json_decode(HttpQuery($url, json_encode($params), $requesttype, '', '', $header));
+
+        setToLog(json_encode($result));
+        
+    	if (isset($result->errors)) {
+            throw new Error("query", 'Error update whois domain info on Pananames', $result->errors[0]->description);
+        }
         return;
     }
 }
