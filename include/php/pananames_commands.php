@@ -287,7 +287,7 @@ class Command {
     	$header = ['SIGNATURE: ' .  getSignature($db, $item_param["item_module"]), 'accept: application/json', 'content-type: application/json'];
     	
         setToLog('URL for open ' . $url);
-	setToLog('SIGNATURE for open ' . getSignature($db, $item_param["item_module"]));
+	setToLog('SIGNATURE for open ' . getSignature($db, $item_param['item_module']));
         setToLog('POST ' . json_encode($params));
         
         $result = json_decode(HttpQuery($url, json_encode($params), $requesttype, '', '', $header));
@@ -295,7 +295,7 @@ class Command {
         setToLog(json_encode($result));
         
     	if (isset($result->errors)) {
-            throw new Error("query", 'Error update whois domain info on Pananames', $result->errors[0]->description);
+            setToLog('Error update whois domain info on Pananames ' . $result->errors[0]->description);
         }
         return;
     }
