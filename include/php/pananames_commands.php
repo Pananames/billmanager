@@ -149,12 +149,12 @@ class Command {
             'claims_accepted' => true
         ];
     
-        $url = getApiUrl($db, $item_param["item_module"]) . 'domains';
+        $url = getApiUrl($db, $item_param['item_module']) . 'domains';
     	$requesttype = 'POST';
-    	$header = ['SIGNATURE: ' .  getSignature($db, $item_param["item_module"]), 'accept: application/json', 'content-type: application/json'];
+    	$header = ['SIGNATURE: ' .  getSignature($db, $item_param['item_module']), 'accept: application/json', 'content-type: application/json'];
     	
         setToLog('URL for open ' . $url);
-	setToLog('SIGNATURE for open ' . getSignature($db, $item_param["item_module"]));
+	setToLog('SIGNATURE for open ' . getSignature($db, $item_param['item_module']));
         setToLog('POST ' . json_encode($params));
         
         $result = json_decode(HttpQuery($url, json_encode($params), $requesttype, '', '', $header));
@@ -162,9 +162,9 @@ class Command {
         setToLog(json_encode($result));
         
     	if (!isset($result->errors)) {
-            LocalQuery("domain.open", array("elid" => $iid, "sok" => "ok"));
+            LocalQuery('domain.open', array('elid' => $iid, 'sok' => 'ok'));
         } else {
-            throw new Error("query", 'Error registration domain on Pananames', $result->errors[0]->description);
+            throw new Error('query', 'Error registration domain on Pananames', $result->errors[0]->description);
         }
         return;
     }
@@ -175,20 +175,20 @@ class Command {
         $iid = array_key_exists('item', $options) ? (int)$options['item'] : 0;
         $item_param = ItemParam($db, $iid);
     
-        $url = getApiUrl($db, $item_param["item_module"]) . 'domains/' . $item_param['domain'];
+        $url = getApiUrl($db, $item_param['item_module']) . 'domains/' . $item_param['domain'];
     	$param = [];
     	$requesttype = 'DELETE';
-    	$header = ['SIGNATURE: ' . getSignature($db, $item_param["item_module"]), 'accept: application/json', 'content-type: application/json'];
+    	$header = ['SIGNATURE: ' . getSignature($db, $item_param['item_module']), 'accept: application/json', 'content-type: application/json'];
     	
         setToLog('URL for close ' . $url);
-	setToLog('SIGNATURE for close ' . getSignature($db, $item_param["item_module"]));
+	setToLog('SIGNATURE for close ' . getSignature($db, $item_param['item_module']));
         
         $result = json_decode(HttpQuery($url, $param, $requesttype, '', '', $header));
 
         setToLog(json_encode($result));
         
     	if (!isset($result->errors)) {
-    	    LocalQuery("service.postclose", array("elid" => $iid, "sok" => "ok", ));
+    	    LocalQuery('service.postclose', array('elid' => $iid, 'sok' => 'ok'));
 	} else {
             setToLog('Error delete domain on Pananames', $result->errors[0]->description);
         }
@@ -201,26 +201,26 @@ class Command {
         $iid = $options['item'];
         $item_param = ItemParam($db, $iid);
         
-        $url =  getApiUrl($db, $item_param["item_module"]) . 'domains/' . $item_param['domain'];
+        $url =  getApiUrl($db, $item_param['item_module']) . 'domains/' . $item_param['domain'];
     	$param = [];
     	$requesttype = 'GET';
-    	$header = ['SIGNATURE: ' . getSignature($db, $item_param["item_module"]), 'accept: application/json', 'content-type: application/json'];
+    	$header = ['SIGNATURE: ' . getSignature($db, $item_param['item_module']), 'accept: application/json', 'content-type: application/json'];
     	$result = json_decode(HttpQuery($url, $param, $requesttype, '', '', $header));
 
 	setToLog('URL for sync_item ' . $url);
-	setToLog('SIGNATURE for sync_item ' . getSignature($db, $item_param["item_module"]));
+	setToLog('SIGNATURE for sync_item ' . getSignature($db, $item_param['item_module']));
 	setToLog('Domain info for sync_item ' . json_encode($result));
 	
     	if (!isset($result->errors)) {
 	    if ($result->data->status == 'ok') {
 	        setToLog('$result->data->status = ' . $result->data->status);
-                LocalQuery("service.postresume", array("elid" => $iid, "sok" => "ok", ));
-                LocalQuery("service.setstatus", array("elid" => $iid, "service_status" => "2"));
+                LocalQuery('service.postresume', array('elid' => $iid, 'sok' => 'ok'));
+                LocalQuery('service.setstatus', array('elid' => $iid, 'service_status' => '2'));
             } else {
-                LocalQuery("service.postsuspend", array("elid" => $iid, "sok" => "ok"));
-                LocalQuery("service.setstatus", array("elid" => $iid, "service_status" => "8"));
+                LocalQuery('service.postsuspend', array('elid' => $iid, 'sok' => 'ok'));
+                LocalQuery('service.setstatus', array('elid' => $iid, 'service_status' => '8'));
             }
-            LocalQuery("service.setexpiredate", array("elid" => $iid, "expiredate" => $param["expiredate"]));
+            LocalQuery('service.setexpiredate', array('elid' => $iid, 'expiredate' => $param['expiredate']));
 	} else {
 	    setToLog('Error sync_item domain on Pananames $result->errors[0]->description = ' . $result->errors[0]->description);
         }
@@ -284,7 +284,7 @@ class Command {
     
         $url = getApiUrl($db, $item_param["item_module"]) . 'domains';
     	$requesttype = 'POST';
-    	$header = ['SIGNATURE: ' .  getSignature($db, $item_param["item_module"]), 'accept: application/json', 'content-type: application/json'];
+    	$header = ['SIGNATURE: ' .  getSignature($db, $item_param['item_module']), 'accept: application/json', 'content-type: application/json'];
     	
         setToLog('URL for open ' . $url);
 	setToLog('SIGNATURE for open ' . getSignature($db, $item_param['item_module']));
