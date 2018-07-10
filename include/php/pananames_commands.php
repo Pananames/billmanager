@@ -319,7 +319,7 @@ class Command {
 	setToLog('Result for setparam ' . json_encode($result));
 	
     	if (!isset($result->errors)) {
-	    if ($result->data->enabled == false) {
+	    if (isset($result->data->enabled)) {
 	        setToLog('$result->data->enabled = ' . $result->data->enabled);
                 LocalQuery("service.postsetparam", array('elid' => $iid, 'sok' => 'ok'));
             }
