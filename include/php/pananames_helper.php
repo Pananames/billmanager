@@ -150,6 +150,15 @@ function getApiUrl($db, $moduleId) {
     return $urlApi;
 }
 
+function getHideWhois($db, $iid) {
+    $param_res = $db->query('SELECT boolvalue FROM item WHERE pricelist=(SELECT pricelist FROM item WHERE parent=' . $iid . ') and parent=' . $iid . ' LIMIT 1');
+    if (!$param_res) {
+        return '';
+    }
+    $hideWhois = $param_res->fetch_row()[0];
+    return $hideWhois;
+}
+
 function getCountryISO($db, $code) {
     $param_res = $db->query('SELECT iso2 FROM country WHERE id = ' . $code . ' LIMIT 1');
     if (!$param_res) {

@@ -33,6 +33,7 @@ class Command {
              <feature name="close"/>
              <feature name="sync_server"/>
              <feature name="service_profile_update"/>
+             <feature name="setparam"/>
           </features>
         </doc>';
         return;
@@ -214,12 +215,12 @@ class Command {
 	    if ($result->data->status == 'ok') {
 	        setToLog('$result->data->status = ' . $result->data->status);
                 LocalQuery("service.postresume", array("elid" => $iid, "sok" => "ok", ));
-                LocalQuery("service.setstatus", array("elid" => $iid, "service_status" => "2", ));
+                LocalQuery("service.setstatus", array("elid" => $iid, "service_status" => "2"));
             } else {
-                LocalQuery("service.postsuspend", array("elid" => $iid, "sok" => "ok", ));
-                LocalQuery("service.setstatus", array("elid" => $iid, "service_status" => "8", ));
+                LocalQuery("service.postsuspend", array("elid" => $iid, "sok" => "ok"));
+                LocalQuery("service.setstatus", array("elid" => $iid, "service_status" => "8"));
             }
-            LocalQuery("service.setexpiredate", array("elid" => $iid, "expiredate" => $param["expiredate"], ));
+            LocalQuery("service.setexpiredate", array("elid" => $iid, "expiredate" => $param["expiredate"]));
 	} else {
 	    setToLog('Error sync_item domain on Pananames $result->errors[0]->description = ' . $result->errors[0]->description);
         }
@@ -295,6 +296,35 @@ class Command {
         
     	if (isset($result->errors)) {
             throw new Error("query", 'Error update whois domain info on Pananames', $result->errors[0]->description);
+        }
+        return;
+    }
+    
+    private function setparam($options)
+    {
+        $db = GetConnection();
+        $iid = $options['item'];
+        $item_param = ItemParam($db, $iid);
+        $hideWhois = (getHideWhois($db, $iid) === 'on') ? true : false;
+        $url = getApiUrl($db, $item_param["item_module"]) . 'domains/' . $item_param['domain'] . '/whois_privacy';
+        
+    	$param = [];
+    	$requesttype = $hideWhois ? 'DELETE' : 'PUT';
+    	$header = ['SIGNATURE: ' . getSignature($db, $item_param['item_module']), 'accept: application/json', 'content-type: application/json'];
+    	$result = json_decode(HttpQuery($url, $param, $requesttype, '', '', $header));
+
+	setToLog('URL for setparam ' . $url);
+        setToLog('Requesttype = ' . $requesttype);
+	setToLog('SIGNATURE for setparam ' . getSignature($db, $item_param['item_module']));
+	setToLog('Result for setparam ' . json_encode($result));
+	
+    	if (!isset($result->errors)) {
+	    if ($result->data->enabled == false) {
+	        setToLog('$result->data->enabled = ' . $result->data->enabled);
+                LocalQuery("service.postsetparam", array('elid' => $iid, 'sok' => 'ok'));
+            }
+	} else {
+	    setToLog('Error setpara for domain ' . $item_param['domain'] . ' on Pananames $result->errors[0]->description = ' . $result->errors[0]->description);
         }
         return;
     }
