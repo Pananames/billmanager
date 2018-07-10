@@ -77,7 +77,6 @@ class Command {
         	  </error>
         	</doc>';
     	    } else {
-        	$data = $result->data;
         	$return = '<?xml version="1.0" encoding="UTF-8"?>
         	<doc>
         	  <ok/>
@@ -282,7 +281,7 @@ class Command {
             ]
         ];
     
-        $url = getApiUrl($db, $item_param["item_module"]) . 'domains';
+        $url = getApiUrl($db, $item_param['item_module']) . 'domains';
     	$requesttype = 'POST';
     	$header = ['SIGNATURE: ' .  getSignature($db, $item_param['item_module']), 'accept: application/json', 'content-type: application/json'];
     	
@@ -306,7 +305,7 @@ class Command {
         $iid = $options['item'];
         $item_param = ItemParam($db, $iid);
         $hideWhois = (getHideWhois($db, $iid) === 'on') ? true : false;
-        $url = getApiUrl($db, $item_param["item_module"]) . 'domains/' . $item_param['domain'] . '/whois_privacy';
+        $url = getApiUrl($db, $item_param['item_module']) . 'domains/' . $item_param['domain'] . '/whois_privacy';
         
     	$param = [];
     	$requesttype = $hideWhois ? 'DELETE' : 'PUT';
@@ -321,7 +320,7 @@ class Command {
     	if (!isset($result->errors)) {
 	    if (isset($result->data->enabled)) {
 	        setToLog('$result->data->enabled = ' . $result->data->enabled);
-                LocalQuery("service.postsetparam", array('elid' => $iid, 'sok' => 'ok'));
+                LocalQuery('service.postsetparam', array('elid' => $iid, 'sok' => 'ok'));
             }
 	} else {
 	    setToLog('Error setpara for domain ' . $item_param['domain'] . ' on Pananames $result->errors[0]->description = ' . $result->errors[0]->description);
